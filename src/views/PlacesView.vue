@@ -17,12 +17,19 @@ interface Pixel {
 const PLACES_CANVAS_DIM = 500;
 const PLACES_TILE_DIM = 10;
 
+const COOLDOWN = 5;
+
 const demo = ref<HTMLCanvasElement>();
 const currentCursor = ref<Cursor | null>(null);
 const isCursorOutside = ref<boolean | null>(null);
+const cooldown = ref<number | null>(null);
 
 const pixel = ref<Pixel[] | null>(null);
 const activeColor = ref<string>("red");
+
+function clearCooldown() {
+  cooldown.value = null;
+}
 
 onMounted(() => {
   const numTilesHorz = Math.floor(PLACES_CANVAS_DIM / PLACES_TILE_DIM);
@@ -49,6 +56,10 @@ onMounted(() => {
   demo.value?.addEventListener(
     "click",
     function () {
+      if (cooldown.value !== null) {
+        console.warn("Take it easy, it has cooldown!");
+        return;
+      }
       if (currentCursor.value === null) return;
       const xItemPos = currentCursor.value.x / PLACES_TILE_DIM;
       const yItemPos = currentCursor.value.y / PLACES_TILE_DIM;
@@ -58,6 +69,7 @@ onMounted(() => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       pixel.value![pixelPos] = { color: activeColor.value };
       if (demo.value) draw(demo.value);
+      cooldown.value = setTimeout(clearCooldown, COOLDOWN * 1000);
     },
     false
   );
