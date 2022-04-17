@@ -3,6 +3,8 @@ import { useMove } from "@vueuse/gesture";
 import type { Handler } from "@vueuse/gesture";
 import { ref, onMounted } from "vue";
 
+import ColorPicker from "../components/ColorPicker.vue";
+
 interface Cursor {
   x: number;
   y: number;
@@ -20,6 +22,7 @@ const currentCursor = ref<Cursor | null>(null);
 const isCursorOutside = ref<boolean | null>(null);
 
 const pixel = ref<Pixel[] | null>(null);
+const activeColor = ref<string>("red");
 
 onMounted(() => {
   const numTilesHorz = Math.floor(PLACES_CANVAS_DIM / PLACES_TILE_DIM);
@@ -53,7 +56,7 @@ onMounted(() => {
       const pixelPos =
         xItemPos + yItemPos * (PLACES_CANVAS_DIM / PLACES_TILE_DIM);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      pixel.value![pixelPos] = { color: "green" };
+      pixel.value![pixelPos] = { color: activeColor.value };
       if (demo.value) draw(demo.value);
     },
     false
@@ -120,6 +123,10 @@ const moveHandler: Handler<"move"> = (ev) => {
 useMove(moveHandler, {
   domTarget: demo,
 });
+
+function changeColor({ color }: { color: string }) {
+  activeColor.value = color;
+}
 </script>
 
 <template>
@@ -130,8 +137,7 @@ useMove(moveHandler, {
       ref="demo"
       v-move="moveHandler"
       class="bg-white"
-    >
-      <div>hallo</div>
-    </canvas>
+    />
+    <ColorPicker @change-color="changeColor" default-color="red" />
   </main>
 </template>
