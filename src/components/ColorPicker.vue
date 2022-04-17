@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineEmits, ref, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 
 const emit = defineEmits(["changeColor"]);
 

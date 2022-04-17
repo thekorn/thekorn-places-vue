@@ -4,6 +4,7 @@ import type { Handler } from "@vueuse/gesture";
 import { ref, onMounted } from "vue";
 
 import ColorPicker from "../components/ColorPicker.vue";
+import SaveButton from "../components/SaveButton.vue";
 
 interface Cursor {
   x: number;
@@ -27,6 +28,13 @@ const cooldown = ref<number | null>(null);
 const pixel = ref<Pixel[] | null>(null);
 const activeColor = ref<string>("red");
 
+const props = defineProps({
+  localStorageKey: {
+    type: String,
+    required: false,
+  },
+});
+
 function clearCooldown() {
   cooldown.value = null;
 }
@@ -36,24 +44,26 @@ onMounted(() => {
 
   pixel.value = new Array(numTilesHorz * numTilesHorz);
 
-  try {
-    const storedPixel: Pixel[] | null = JSON.parse(
-      window.localStorage.getItem("pixel") || "null"
-    );
-    if (storedPixel !== null) {
-      if (storedPixel.length === pixel.value.length) {
-        pixel.value = storedPixel;
-        if (demo.value) draw(demo.value);
-      } else {
-        console.error(
-          "failed loading pixel from localStorage - wrong dimensions"
-        );
+  if (props.localStorageKey) {
+    try {
+      const storedPixel: Pixel[] | null = JSON.parse(
+        window.localStorage.getItem(props.localStorageKey) || "null"
+      );
+      if (storedPixel !== null) {
+        if (storedPixel.length === pixel.value.length) {
+          pixel.value = storedPixel;
+          if (demo.value) draw(demo.value);
+        } else {
+          console.error(
+            "failed loading pixel from localStorage - wrong dimensions"
+          );
+        }
       }
+    } catch (error) {
+      console.warn("failed loading pixel from local storage, error was", error);
+      console.warn("dropping pixel from loca storage", error);
+      window.localStorage.removeItem(props.localStorageKey);
     }
-  } catch (error) {
-    console.warn("failed loading pixel from local storage, error was", error);
-    console.warn("dropping pixel from loca storage", error);
-    window.localStorage.removeItem("pixel");
   }
 
   demo.value?.addEventListener(
@@ -89,7 +99,12 @@ onMounted(() => {
         xItemPos + yItemPos * (PLACES_CANVAS_DIM / PLACES_TILE_DIM);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       pixel.value![pixelPos] = { color: activeColor.value };
-      window.localStorage.setItem("pixel", JSON.stringify(pixel.value));
+      if (props.localStorageKey) {
+        window.localStorage.setItem(
+          props.localStorageKey,
+          JSON.stringify(pixel.value)
+        );
+      }
       if (demo.value) draw(demo.value);
       cooldown.value = setTimeout(clearCooldown, COOLDOWN * 1000);
     },
@@ -174,5 +189,6 @@ function changeColor({ color }: { color: string }) {
       class="bg-white"
     />
     <ColorPicker @change-color="changeColor" default-color="red" />
+    <SaveButton local-storage-key="pixel" />
   </main>
 </template>
