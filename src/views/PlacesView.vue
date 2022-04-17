@@ -15,7 +15,7 @@ interface Pixel {
 }
 
 const PLACES_CANVAS_DIM = 500;
-const PLACES_TILE_DIM = 50;
+const PLACES_TILE_DIM = 10;
 
 const demo = ref<HTMLCanvasElement>();
 const currentCursor = ref<Cursor | null>(null);
@@ -101,8 +101,10 @@ const moveHandler: Handler<"move"> = (ev) => {
   if (!ctx) return;
 
   const rect = canvas.getBoundingClientRect();
-  const mouseX = event.clientX - rect.left;
-  const mouseY = event.clientY - rect.top;
+
+  const scale = canvas.width / rect.width;
+  const mouseX = (event.clientX - rect.left) * scale;
+  const mouseY = (event.clientY - rect.top) * scale;
 
   const rectTopX = Math.floor(mouseX / PLACES_TILE_DIM) * PLACES_TILE_DIM;
   const rectTopY = Math.floor(mouseY / PLACES_TILE_DIM) * PLACES_TILE_DIM;

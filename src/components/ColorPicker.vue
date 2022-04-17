@@ -33,7 +33,7 @@ onMounted(() => {
 
 <template>
   <ul
-    class="bg-white mt-10 rounded-lg flex flex-row space-x-4 justify-center p-2"
+    class="bg-white mt-10 rounded-lg flex flex-col md:flex-row md:space-y-0 space-y-4 space-x-0 md:space-x-4 justify-center p-2"
   >
     <li v-for="color in Object.keys(COLORS)" :key="color">
       <button
@@ -42,7 +42,7 @@ onMounted(() => {
           { 'outline-3': color === activeColor },
           COLORS[color][0],
           'transition duration-150 ease-in-out hover:scale-x-110',
-          'w-20 h-20 rounded-full border-2 flex justify-center items-center outline outline-offset-2 outline-cyan-500',
+          'w-5 h-5 md:w-20 md:h-20 rounded-full border-2 flex justify-center items-center outline outline-offset-2 outline-cyan-500',
         ]"
         @click="changeColor(color)"
       />
