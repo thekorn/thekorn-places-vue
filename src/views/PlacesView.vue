@@ -18,8 +18,6 @@ interface Pixel {
 const PLACES_CANVAS_DIM = 500;
 const PLACES_TILE_DIM = 10;
 
-const COOLDOWN = 5;
-
 const demo = ref<HTMLCanvasElement>();
 const currentCursor = ref<Cursor | null>(null);
 const isCursorOutside = ref<boolean | null>(null);
@@ -31,6 +29,10 @@ const activeColor = ref<string>("red");
 const props = defineProps({
   localStorageKey: {
     type: String,
+    required: false,
+  },
+  cooldown: {
+    type: Number,
     required: false,
   },
 });
@@ -106,7 +108,9 @@ onMounted(() => {
         );
       }
       if (demo.value) draw(demo.value);
-      cooldown.value = setTimeout(clearCooldown, COOLDOWN * 1000);
+      if (props.cooldown) {
+        cooldown.value = setTimeout(clearCooldown, props.cooldown * 1000);
+      }
     },
     false
   );
