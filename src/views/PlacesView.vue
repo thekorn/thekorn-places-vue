@@ -129,7 +129,7 @@ function changeColor({ color }: { color: string }) {
 </script>
 
 <template>
-  <main>
+  <main class="flex flex-col">
     <canvas
       :height="PLACES_CANVAS_DIM"
       :width="PLACES_CANVAS_DIM"
