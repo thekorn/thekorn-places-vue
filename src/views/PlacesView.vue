@@ -119,7 +119,6 @@ const moveHandler: Handler<"move"> = (ev) => {
   draw(canvas);
 };
 
-// Composable usage
 useMove(moveHandler, {
   domTarget: demo,
 });

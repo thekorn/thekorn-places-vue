@@ -22,15 +22,12 @@ const COLORS: Record<string, [string, string]> = {
 };
 
 function changeColor(color: string) {
-  console.log("BBBBB", color);
-
   activeColor.value = color;
-
   emit("changeColor", { color: COLORS[color][1] });
 }
 
 onMounted(() => {
-  activeColor.value = props.defaultColor;
+  changeColor(props.defaultColor);
 });
 </script>
 
@@ -44,6 +41,7 @@ onMounted(() => {
           { 'outline-0': color !== activeColor },
           { 'outline-3': color === activeColor },
           COLORS[color][0],
+          'transition duration-150 ease-in-out hover:scale-x-110',
           'w-20 h-20 rounded-full border-2 flex justify-center items-center outline outline-offset-2 outline-cyan-500',
         ]"
         @click="changeColor(color)"
