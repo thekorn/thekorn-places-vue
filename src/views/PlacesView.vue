@@ -35,6 +35,27 @@ onMounted(() => {
   const numTilesHorz = Math.floor(PLACES_CANVAS_DIM / PLACES_TILE_DIM);
 
   pixel.value = new Array(numTilesHorz * numTilesHorz);
+
+  try {
+    const storedPixel: Pixel[] | null = JSON.parse(
+      window.localStorage.getItem("pixel") || "null"
+    );
+    if (storedPixel !== null) {
+      if (storedPixel.length === pixel.value.length) {
+        pixel.value = storedPixel;
+        if (demo.value) draw(demo.value);
+      } else {
+        console.error(
+          "failed loading pixel from localStorage - wrong dimensions"
+        );
+      }
+    }
+  } catch (error) {
+    console.warn("failed loading pixel from local storage, error was", error);
+    console.warn("dropping pixel from loca storage", error);
+    window.localStorage.removeItem("pixel");
+  }
+
   demo.value?.addEventListener(
     "mouseleave",
     function () {
@@ -68,6 +89,7 @@ onMounted(() => {
         xItemPos + yItemPos * (PLACES_CANVAS_DIM / PLACES_TILE_DIM);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       pixel.value![pixelPos] = { color: activeColor.value };
+      window.localStorage.setItem("pixel", JSON.stringify(pixel.value));
       if (demo.value) draw(demo.value);
       cooldown.value = setTimeout(clearCooldown, COOLDOWN * 1000);
     },
