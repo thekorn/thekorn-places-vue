@@ -11,10 +11,6 @@ interface Cursor {
   y: number;
 }
 
-interface Pixel {
-  color: string;
-}
-
 const PLACES_CANVAS_DIM = 500;
 const PLACES_TILE_DIM = 10;
 
@@ -23,8 +19,8 @@ const currentCursor = ref<Cursor | null>(null);
 const isCursorOutside = ref<boolean | null>(null);
 const cooldown = ref<number | null>(null);
 
-const pixel = ref<Pixel[] | null>(null);
-const activeColor = ref<string>("red");
+const pixel = ref<number[] | null>(null);
+const activeColor = ref<[number, number, number]>([225, 29, 72]);
 
 const props = defineProps({
   localStorageKey: {
@@ -44,11 +40,14 @@ function clearCooldown() {
 onMounted(() => {
   const numTilesHorz = Math.floor(PLACES_CANVAS_DIM / PLACES_TILE_DIM);
 
-  pixel.value = new Array(numTilesHorz * numTilesHorz);
+  pixel.value = Array.from(
+    new Array(numTilesHorz * numTilesHorz * 3),
+    () => 255
+  );
 
   if (props.localStorageKey) {
     try {
-      const storedPixel: Pixel[] | null = JSON.parse(
+      const storedPixel: number[] | null = JSON.parse(
         window.localStorage.getItem(props.localStorageKey) || "null"
       );
       if (storedPixel !== null) {
@@ -98,9 +97,13 @@ onMounted(() => {
       const yItemPos = currentCursor.value.y / PLACES_TILE_DIM;
 
       const pixelPos =
-        xItemPos + yItemPos * (PLACES_CANVAS_DIM / PLACES_TILE_DIM);
+        3 * (xItemPos + yItemPos * (PLACES_CANVAS_DIM / PLACES_TILE_DIM));
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      pixel.value![pixelPos] = { color: activeColor.value };
+      pixel.value![pixelPos] = activeColor.value[0];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      pixel.value![pixelPos + 1] = activeColor.value[1];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      pixel.value![pixelPos + 2] = activeColor.value[2];
       if (props.localStorageKey) {
         window.localStorage.setItem(
           props.localStorageKey,
@@ -116,22 +119,37 @@ onMounted(() => {
   );
 });
 
+function* iteratePixel(
+  pixel: number[] | null
+): Generator<[number, number, number]> {
+  if (pixel !== null) {
+    let i = 0;
+    while (i < pixel.length) {
+      const r = pixel[i++];
+      const g = pixel[i++];
+      const b = pixel[i++];
+      yield [r, g, b];
+    }
+  }
+}
+
 function draw(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  pixel.value?.forEach((pixel: Pixel | undefined, index: number) => {
-    if (pixel) {
-      const rectTopX =
-        (index % (PLACES_CANVAS_DIM / PLACES_TILE_DIM)) * PLACES_TILE_DIM;
-      const rectTopY =
-        Math.floor(index / (PLACES_CANVAS_DIM / PLACES_TILE_DIM)) *
-        PLACES_TILE_DIM;
-      ctx.fillStyle = pixel.color;
-      ctx.fillRect(rectTopX, rectTopY, PLACES_TILE_DIM, PLACES_TILE_DIM);
-    }
-  });
+  let index = 0;
+  for (const rgb of iteratePixel(pixel.value)) {
+    const rectTopX =
+      (index % (PLACES_CANVAS_DIM / PLACES_TILE_DIM)) * PLACES_TILE_DIM;
+    const rectTopY =
+      Math.floor(index / (PLACES_CANVAS_DIM / PLACES_TILE_DIM)) *
+      PLACES_TILE_DIM;
+    ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+    console.log(`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
+    ctx.fillRect(rectTopX, rectTopY, PLACES_TILE_DIM, PLACES_TILE_DIM);
+    index++;
+  }
 
   if (!isCursorOutside.value && currentCursor.value !== null) {
     ctx.strokeRect(
@@ -178,7 +196,7 @@ useMove(moveHandler, {
   domTarget: demo,
 });
 
-function changeColor({ color }: { color: string }) {
+function changeColor({ color }: { color: [number, number, number] }) {
   activeColor.value = color;
 }
 </script>

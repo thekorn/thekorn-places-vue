@@ -13,12 +13,12 @@ const props = defineProps({
   },
 });
 
-const COLORS: Record<string, [string, string]> = {
-  black: ["bg-black", "rgb(0, 0, 0)"],
-  white: ["bg-white", "rgb(255, 255, 255)"],
-  green: ["bg-green-900", "rgb(20, 83, 45)"],
-  red: ["bg-rose-600", "rgb(225, 29, 72)"],
-  blue: ["bg-indigo-700", "rgb(67, 56, 202)"],
+const COLORS: Record<string, [string, [number, number, number]]> = {
+  black: ["bg-black", [0, 0, 0]],
+  white: ["bg-white", [255, 255, 255]],
+  green: ["bg-green-900", [20, 83, 45]],
+  red: ["bg-rose-600", [225, 29, 72]],
+  blue: ["bg-indigo-700", [67, 56, 202]],
 };
 
 function changeColor(color: string) {
