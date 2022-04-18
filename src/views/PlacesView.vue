@@ -119,16 +119,14 @@ onMounted(() => {
   );
 });
 
-function* iteratePixel(
-  pixel: number[] | null
-): Generator<[number, number, number]> {
+function* iteratePixel(pixel: number[] | null): Generator<string> {
   if (pixel !== null) {
     let i = 0;
     while (i < pixel.length) {
       const r = pixel[i++];
       const g = pixel[i++];
       const b = pixel[i++];
-      yield [r, g, b];
+      yield `rgb(${r}, ${g}, ${b})`;
     }
   }
 }
@@ -145,8 +143,7 @@ function draw(canvas: HTMLCanvasElement) {
     const rectTopY =
       Math.floor(index / (PLACES_CANVAS_DIM / PLACES_TILE_DIM)) *
       PLACES_TILE_DIM;
-    ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-    console.log(`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
+    ctx.fillStyle = rgb;
     ctx.fillRect(rectTopX, rectTopY, PLACES_TILE_DIM, PLACES_TILE_DIM);
     index++;
   }
@@ -162,8 +159,6 @@ function draw(canvas: HTMLCanvasElement) {
 }
 
 const moveHandler: Handler<"move"> = (ev) => {
-  //console.log(ev);
-
   const event = ev.event;
   const canvas = demo.value;
   if (!canvas) return;
